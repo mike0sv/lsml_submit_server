@@ -1,7 +1,6 @@
 import tempfile
 from pprint import pprint
 
-import pandas as pd
 import requests
 
 
@@ -11,7 +10,7 @@ class EvalClient:
         self.host = host
         self._url = 'http://{}:{}/eval'.format(host, port)
 
-    def make_eval(self, df: pd.DataFrame):
+    def make_eval(self, df):
 
         with tempfile.TemporaryDirectory() as tmp:
             filename = '{}/submit.csv.gz'.format(tmp)
