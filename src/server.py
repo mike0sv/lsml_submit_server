@@ -10,6 +10,8 @@ from sklearn.metrics import mean_squared_error as mse, mean_absolute_error as ma
 app = Flask(__name__)
 
 LOGS_DIR = os.environ.get('LOG_DIR', './logs')
+os.makedirs(LOGS_DIR, exist_ok=True)
+
 TEST_Y_PATH = os.environ.get('YPATH', './test_y.csv')
 testY = pd.read_csv(TEST_Y_PATH)
 
