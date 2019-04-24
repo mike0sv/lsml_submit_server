@@ -1,3 +1,4 @@
+import io
 import json
 import os
 import random
@@ -37,7 +38,7 @@ def log_to_dir(id, response):
         }, f, ensure_ascii=False, indent=2)
     if response.status_code == 200:
         req = '{}_request.csv.gzip'.format(id)
-        pd.read_json(request.json).to_csv(os.path.join(LOGS_DIR, req), index=False, compression='gzip')
+        _get_df().to_csv(os.path.join(LOGS_DIR, req), index=False, compression='gzip')
 
 
 @app.after_request
@@ -46,6 +47,16 @@ def log_data(response):
     log_to_dir(id, response)
 
     return response
+
+
+def _get_df():
+    if hasattr(request, 'df_'):
+        return request.df_
+    submit = request.files['submit']
+    buf = io.BytesIO(submit.read())
+    df = pd.read_csv(buf, compression='gzip')
+    request.df_ = df
+    return df
 
 
 def validate_data(df):
@@ -78,8 +89,7 @@ def eval_data(df):
 
 @app.route('/eval', methods=['POST'])
 def evaluate():
-    data = request.json
-    df = pd.read_json(data)
+    df = _get_df()
     validate_data(df)
     return jsonify({
         'ok': True,

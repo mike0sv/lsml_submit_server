@@ -1,5 +1,7 @@
+import tempfile
 from pprint import pprint
 
+import pandas as pd
 import requests
 
 
@@ -9,17 +11,22 @@ class EvalClient:
         self.host = host
         self._url = 'http://{}:{}/eval'.format(host, port)
 
-    def make_eval(self, df):
-        r = requests.post(self._url, json=df.to_json())
-        if r.status_code == 200:
-            return r.json()
-        elif r.status_code == 400:
-            raise ValueError(r.json()['msg'])
-        else:
-            r.raise_for_status()
+    def make_eval(self, df: pd.DataFrame):
+
+        with tempfile.TemporaryDirectory() as tmp:
+            filename = '{}/submit.csv.gz'.format(tmp)
+            df.to_csv(filename, compression='gzip', header=True)
+            with open(filename, 'rb') as submit:
+                r = requests.post(self._url, files={'submit': submit})
+            if r.status_code == 200:
+                return r.json()
+            elif r.status_code == 400:
+                raise ValueError(r.json()['msg'])
+            else:
+                r.raise_for_status()
 
 
-_ec = EvalClient()
+_ec = EvalClient('35.231.19.141', 8000)
 
 
 def make_eval(df):
@@ -33,8 +40,9 @@ def main():
         {'id': 2, 'views': 8},
         {'id': 3, 'views': 8},
     ])
+    data = data.set_index('id')
 
-    pprint(make_eval(data))
+    pprint(EvalClient().make_eval(data.views))
 
 
 if __name__ == '__main__':
