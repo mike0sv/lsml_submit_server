@@ -1,3 +1,4 @@
+import shutil
 import tempfile
 from pprint import pprint
 
@@ -11,18 +12,20 @@ class EvalClient:
         self._url = 'http://{}:{}/eval'.format(host, port)
 
     def make_eval(self, df):
-
-        with tempfile.TemporaryDirectory() as tmp:
-            filename = '{}/submit.csv.gz'.format(tmp)
+        filename = tempfile.mktemp('_submit.csv.gz')
+        try:
             df.to_csv(filename, compression='gzip', header=True)
             with open(filename, 'rb') as submit:
                 r = requests.post(self._url, files={'submit': submit})
-            if r.status_code == 200:
-                return r.json()
-            elif r.status_code == 400:
-                raise ValueError(r.json()['msg'])
-            else:
-                r.raise_for_status()
+        finally:
+            shutil.rmtree(filename, True)
+
+        if r.status_code == 200:
+            return r.json()
+        elif r.status_code == 400:
+            raise ValueError(r.json()['msg'])
+        else:
+            r.raise_for_status()
 
 
 _ec = EvalClient('35.231.19.141', 8000)
