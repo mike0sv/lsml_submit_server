@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+  eval_backend:
+    build: src
+    image: eval_backend
+    container_name: eval_backend
+    ports:
+      - 8000:5000
+
+    environment:
+      YPATH: /test_y.csv
+
+    volumes:
+      - ./test_y2.csv:/test_y.csv
