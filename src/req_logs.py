@@ -54,6 +54,14 @@ class RLog:
     def date(self):
         return _date(self.datetime)
 
+    @property
+    def is_final(self):
+        return self.data['final']
+
+    @property
+    def data_path(self):
+        return os.path.join(LOGS_DIR, '{}_request.csv.gzip'.format(self.id))
+
 
 def _read_logs():
     logs = defaultdict(lambda: defaultdict(list))
@@ -70,12 +78,20 @@ def _read_logs():
 def log_to_dir(id, df, response):
     with _loglock:
         path = '{}_response.json'.format(id)
+        is_final = request.args.get('final') == 'True'
         with open(os.path.join(LOGS_DIR, path), 'w', encoding='utf8')as f:
             json.dump({
+                'final': is_final,
                 'response': response.json,
                 'environ': {k: str(v) for k, v in request.environ.items()}
             }, f, ensure_ascii=False, indent=2)
-        if response.status_code == 200 and request.args.get('final') == 'True':
+        if response.status_code == 200 and is_final:
+            for user_submit in [_ for user_l in _read_logs()[_origin()].values() for _ in user_l]:
+                if user_submit.is_final and user_submit.id != id:
+                    data_path = user_submit.data_path
+                    if os.path.isfile(data_path):
+                        os.remove(data_path)
+
             path = '{}_request.csv.gzip'.format(id)
             df.to_csv(os.path.join(LOGS_DIR, path), index=False, compression='gzip')
 

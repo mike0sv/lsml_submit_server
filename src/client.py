@@ -44,7 +44,7 @@ def main():
     ])
     data = data.set_index('id')
 
-    pprint(EvalClient().make_eval(data.views))
+    pprint(EvalClient().make_eval(data.views, final=True))
 
 
 if __name__ == '__main__':

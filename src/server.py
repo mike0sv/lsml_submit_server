@@ -1,5 +1,4 @@
 import io
-import os
 import random
 import time
 
@@ -7,10 +6,9 @@ import pandas as pd
 from flask import Flask, request, jsonify
 
 from metrics import eval_data, validate_data, EvaluationError
-from req_logs import log_to_dir, user_logs, check_tries
+from req_logs import log_to_dir, check_tries
 
 app = Flask(__name__)
-
 
 
 @app.errorhandler(EvaluationError)
@@ -37,11 +35,6 @@ def _get_df():
     df = pd.read_csv(buf, compression='gzip')
     request.df_ = df
     return df
-
-
-
-
-
 
 
 @app.route('/eval', methods=['POST'])
