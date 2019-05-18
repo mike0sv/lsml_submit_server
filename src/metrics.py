@@ -31,7 +31,7 @@ def mape(true, pred):
 
 
 def rmse(true, pred):
-    return mse(true, pred) ** 2
+    return mse(true, pred) ** 0.5
 
 
 def eval_data(df):
