@@ -4,12 +4,14 @@ import json
 import os
 import warnings
 from collections import defaultdict
+from functools import wraps
 from threading import Lock
 
 from flask import request
 
 from metrics import EvaluationError
 
+LOG_SUBMITS = os.environ.get('LOG_SUBMITS', 'true') == 'true'
 LOGS_DIR = os.environ.get('LOG_DIR', './logs')
 os.makedirs(LOGS_DIR, exist_ok=True)
 _loglock = Lock()
@@ -75,6 +77,20 @@ def _read_logs():
     return logs
 
 
+def logs_on(default=None):
+    def d(f):
+        @wraps(f)
+        def w(*args, **kwargs):
+            if LOG_SUBMITS:
+                return f(*args, **kwargs)
+            return default
+
+        return w
+
+    return d
+
+
+@logs_on()
 def log_to_dir(id, df, response):
     with _loglock:
         path = '{}_response.json'.format(id)
@@ -96,12 +112,14 @@ def log_to_dir(id, df, response):
             df.to_csv(os.path.join(LOGS_DIR, path), index=False, compression='gzip')
 
 
+@logs_on([])
 def user_logs():
     with _loglock:
         logs = _read_logs()
         return logs[_origin()][_date()]
 
 
+@logs_on()
 def check_tries():
     if len(user_logs()) >= MAXIMUM_TRIES:
         raise EvaluationError('too many tries')
