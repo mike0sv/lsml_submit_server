@@ -41,7 +41,7 @@ class WrongData(unittest.TestCase):
         if is_ok:
             self.assertTrue(data['ok'], pformat(data))
             if zero_error:
-                self.assertTrue(all(m == 0 for m in data['data'].values()),  pformat(data))
+                self.assertTrue(all(m == 0 for m in data['data'].values()), pformat(data))
         else:
             self.assertFalse(data['ok'], pformat(data))
             if msg_like:
@@ -81,3 +81,8 @@ class WrongData(unittest.TestCase):
     def test_ok(self):
         import metrics
         self._eval(metrics.testY, is_ok=True, zero_error=True)
+
+    def test_results(self):
+        r = self.client.get('/result')
+        print(r.json)
+        self.assertEqual(r.status_code, 200)

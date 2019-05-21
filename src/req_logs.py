@@ -127,3 +127,16 @@ def user_logs():
 def check_tries():
     if len(user_logs()) >= MAXIMUM_TRIES:
         raise EvaluationError('too many tries')
+
+
+def user_logs_formatted():
+    import stats
+    with _loglock:
+        logs = _read_logs()[_origin()]
+    return {
+        date: [{
+            'is_final': l.is_final,
+            'baseline_beaten': stats.baseline_beated(l),
+            'metrics': l.metrics
+        } for l in date_logs] for date, date_logs in logs.items()
+    }

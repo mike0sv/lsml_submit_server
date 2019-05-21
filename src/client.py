@@ -9,14 +9,14 @@ class EvalClient:
     def __init__(self, host='localhost', port=5000):
         self.port = port
         self.host = host
-        self._url = 'http://{}:{}/eval'.format(host, port)
+        self._url = 'http://{}:{}/'.format(host, port)
 
     def make_eval(self, df, final=False):
         filename = tempfile.mktemp('_submit.csv.gz')
         try:
             df.to_csv(filename, compression='gzip', header=True)
             with open(filename, 'rb') as submit:
-                r = requests.post(self._url, params={'final': final}, files={'submit': submit})
+                r = requests.post(self._url + 'eval', params={'final': final}, files={'submit': submit})
         finally:
             shutil.rmtree(filename, True)
 
@@ -26,6 +26,11 @@ class EvalClient:
             raise ValueError(r.json()['msg'])
         else:
             r.raise_for_status()
+
+    def check_results(self):
+        r = requests.get(self._url + 'result')
+        r.raise_for_status()
+        return r.json()
 
 
 _ec = EvalClient('35.231.19.141', 8000)

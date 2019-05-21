@@ -6,7 +6,7 @@ import pandas as pd
 from flask import Flask, request, jsonify
 
 from metrics import eval_data, validate_data, EvaluationError
-from req_logs import log_to_dir, check_tries
+from req_logs import log_to_dir, check_tries, user_logs_formatted
 
 app = Flask(__name__)
 
@@ -21,6 +21,8 @@ def error_handler(error):
 
 @app.after_request
 def log_data(response):
+    if not request.full_path.startswith('/eval'):
+        return response
     id = '{}_{}'.format(int(time.time()), random.randint(0, 100))
     log_to_dir(id, _get_df(), response)
 
@@ -46,6 +48,11 @@ def evaluate():
         'ok': True,
         'data': eval_data(df)
     })
+
+
+@app.route('/result', methods=['GET'])
+def user_results():
+    return jsonify(user_logs_formatted())
 
 
 def main():
