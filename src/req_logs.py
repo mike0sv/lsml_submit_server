@@ -64,6 +64,10 @@ class RLog:
     def data_path(self):
         return os.path.join(LOGS_DIR, '{}_request.csv.gzip'.format(self.id))
 
+    @property
+    def metrics(self):
+        return self.data['response']['data']
+
 
 def _read_logs():
     logs = defaultdict(lambda: defaultdict(list))
