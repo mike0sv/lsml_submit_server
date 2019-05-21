@@ -40,6 +40,10 @@ def make_eval(df, final=False):
     return _ec.make_eval(df, final)
 
 
+def check_results():
+    return _ec.check_results()
+
+
 def main():
     import pandas as pd
     data = pd.DataFrame([
