@@ -9,7 +9,8 @@ class EvalClient:
     def __init__(self, host='localhost', port=5000):
         self.port = port
         self.host = host
-        self._url = 'http://{}:{}/'.format(host, port)
+        self._url = 'https://{}:{}/'.format(host, port)
+        self.password = getpass.getpass()
 
     def make_eval(self, df, final=False):
         filename = tempfile.mktemp('_submit.csv.gz')
@@ -17,7 +18,7 @@ class EvalClient:
             df.to_csv(filename, compression='gzip', header=True)
             with open(filename, 'rb') as submit:
                 r = requests.post(self._url + 'eval', params={'final': final}, files={'submit': submit},
-                                  headers={'Xkey': getpass.getuser()})
+                                  auth=(getpass.getuser(), self.password))
         finally:
             shutil.rmtree(filename, True)
 
@@ -34,7 +35,7 @@ class EvalClient:
         return r.json()
 
 
-_ec = EvalClient('35.231.19.141', 8000)
+_ec = EvalClient('jn.hse.aigmx.com', 443)
 
 
 def make_eval(df, final=False):
@@ -54,7 +55,7 @@ def main():
     ])
     data = data.set_index('id')
 
-    pprint(EvalClient().make_eval(data.views, final=True))
+    pprint(_ec.make_eval(data.views, final=True))
 
 
 if __name__ == '__main__':

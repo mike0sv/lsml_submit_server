@@ -20,9 +20,9 @@ MAXIMUM_TRIES = int(os.environ.get('MAXIMUM_TRIES', 5))
 
 
 def _origin(data=None):
-    data = data or {'headers': dict(request.headers)}
+    data = data or {'auth': dict(request.authorization)}
     try:
-        return data['headers']['Xkey']
+        return data['auth']['username']
     except KeyError:
         raise EvaluationError('no key')
 
@@ -49,7 +49,7 @@ class RLog:
 
     @property
     def origin(self):
-        return _origin(self.data['environ'])
+        return _origin(self.data)
 
     @property
     def datetime(self):
@@ -107,7 +107,8 @@ def log_to_dir(id, df, response):
                 'final': is_final,
                 'response': response.json,
                 'environ': {k: str(v) for k, v in request.environ.items()},
-                'headers': dict(request.headers)
+                'headers': dict(request.headers),
+                'auth': dict(request.authorization)
             }, f, ensure_ascii=False, indent=2)
         if response.status_code == 200 and is_final:
             for user_submit in [_ for user_l in _read_logs()[_origin()].values() for _ in user_l]:
