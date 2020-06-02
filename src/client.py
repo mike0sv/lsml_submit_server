@@ -1,7 +1,7 @@
 import shutil
 import tempfile
 from pprint import pprint
-
+import getpass
 import requests
 
 
@@ -16,7 +16,8 @@ class EvalClient:
         try:
             df.to_csv(filename, compression='gzip', header=True)
             with open(filename, 'rb') as submit:
-                r = requests.post(self._url + 'eval', params={'final': final}, files={'submit': submit})
+                r = requests.post(self._url + 'eval', params={'final': final}, files={'submit': submit},
+                                  headers={'Xkey': getpass.getuser()})
         finally:
             shutil.rmtree(filename, True)
 

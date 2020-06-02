@@ -14,5 +14,5 @@ services:
       YPATH: /test_y.csv
 
     volumes:
-      - ./test_y2.csv:/test_y.csv
+      - ./test_y2020.csv:/test_y.csv
       - ./src/logs:/src/logs

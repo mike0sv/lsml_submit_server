@@ -36,7 +36,7 @@ class WrongData(unittest.TestCase):
 
     def _eval(self, df, is_ok=False, msg_like=None, zero_error=False):
         with make_data(df) as submit:
-            r = self.client.post('/eval', data={'submit': submit})
+            r = self.client.post('/eval', data={'submit': submit}, headers={'Xkey': 'a'})
         data = r.json
         if is_ok:
             self.assertTrue(data['ok'], pformat(data))
@@ -83,6 +83,6 @@ class WrongData(unittest.TestCase):
         self._eval(metrics.testY, is_ok=True, zero_error=True)
 
     def test_results(self):
-        r = self.client.get('/result')
+        r = self.client.get('/result', headers={'Xkey': 'a'})
         print(r.json)
         self.assertEqual(r.status_code, 200)

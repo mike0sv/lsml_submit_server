@@ -20,8 +20,11 @@ MAXIMUM_TRIES = int(os.environ.get('MAXIMUM_TRIES', 5))
 
 
 def _origin(data=None):
-    data = data or request.environ
-    return data['REMOTE_ADDR']
+    data = data or {'headers': dict(request.headers)}
+    try:
+        return data['headers']['Xkey']
+    except KeyError:
+        raise EvaluationError('no key')
 
 
 def _date(date=None):
@@ -103,7 +106,8 @@ def log_to_dir(id, df, response):
             json.dump({
                 'final': is_final,
                 'response': response.json,
-                'environ': {k: str(v) for k, v in request.environ.items()}
+                'environ': {k: str(v) for k, v in request.environ.items()},
+                'headers': dict(request.headers)
             }, f, ensure_ascii=False, indent=2)
         if response.status_code == 200 and is_final:
             for user_submit in [_ for user_l in _read_logs()[_origin()].values() for _ in user_l]:
