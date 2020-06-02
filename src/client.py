@@ -30,7 +30,7 @@ class EvalClient:
             r.raise_for_status()
 
     def check_results(self):
-        r = requests.get(self._url + 'result')
+        r = requests.get(self._url + 'result', auth=(getpass.getuser(), self.password))
         r.raise_for_status()
         return r.json()
 
