@@ -8,7 +8,7 @@ services:
     image: eval_backend
     container_name: eval_backend
     ports:
-      - 8000:5000
+      - 8001:5000
 
     environment:
       YPATH: /test_y.csv
