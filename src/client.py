@@ -10,15 +10,28 @@ class EvalClient:
         self.port = port
         self.host = host
         self._url = 'https://{}:{}/'.format(host, port)
-        self.password = getpass.getpass()
-
+        self._user = None
+        self._password = None
+    
+    @property
+    def user(self):
+        if self._user is None:
+            self._user = input('Enter username:\n')
+        return self._user
+    
+    @property
+    def password(self):
+        if self._password is None:
+            self._password = getpass.getpass('Enter password:\n')
+        return self._password
+    
     def make_eval(self, df, final=False):
         filename = tempfile.mktemp('_submit.csv.gz')
         try:
             df.to_csv(filename, compression='gzip', header=True)
             with open(filename, 'rb') as submit:
                 r = requests.post(self._url + 'eval', params={'final': final}, files={'submit': submit},
-                                  auth=(getpass.getuser(), self.password))
+                                  auth=(self.user, self.password))
         finally:
             shutil.rmtree(filename, True)
 
@@ -30,12 +43,12 @@ class EvalClient:
             r.raise_for_status()
 
     def check_results(self):
-        r = requests.get(self._url + 'result', auth=(getpass.getuser(), self.password))
+        r = requests.get(self._url + 'result', auth=(self.user, self.password))
         r.raise_for_status()
         return r.json()
 
 
-_ec = EvalClient('jn.hse.aigmx.com', 443)
+_ec = EvalClient('sun.ru77.ru', 8002)
 
 
 def make_eval(df, final=False):
