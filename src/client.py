@@ -48,7 +48,7 @@ class EvalClient:
         return r.json()
 
 
-_ec = EvalClient('sun.ru77.ru', 8002)
+_ec = EvalClient('sun.ru77.ru', 38002)
 
 
 def make_eval(df, final=False):
